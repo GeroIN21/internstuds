@@ -1,0 +1,136 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('diploservice2:server');
+var http = require('http');
+var soap = require('soap'); 
+var srv = require('../service/service');
+var models = require('../models');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+models.sequelize.sync().then(function() {
+  /**
+   * Listen on provided port, on all network interfaces.
+   */
+  server.listen(port, function() {
+    debug('\nExpress server listening on http://' + ( server.address().address === '::' ? 'localhost' : server.address().address ) + ':' + server.address().port);
+  });
+  server.on('error', onError);
+  server.on('listening', onListening);
+});
+
+/** 
+ * Listen soap.
+*/
+try {  
+  let soapSrv = soap.listen(server, '/instudservice', srv.service, srv.wsdl);
+  let options = new Object({
+    rootName: { name: 'internStudentsService' },
+    namespace: {}
+  });
+
+  soapSrv.addSoapHeader((options, args, headers, req) => {
+    // console.log('Request: ', req);
+    let h = headers;
+    return `<xrd:client id:objectType="SUBSYSTEM">
+                <id:xRoadInstance>${h.client.xRoadInstance}</id:xRoadInstance>
+                <id:memberClass>${h.client.memberClass}</id:memberClass>
+                <id:memberCode>${h.client.memberCode}</id:memberCode>
+                <id:subsystemCode>${h.client.subsystemCode}</id:subsystemCode>
+            </xrd:client>
+            <xrd:service id:objectType="SERVICE">
+                <id:xRoadInstance>${h.service.xRoadInstance}</id:xRoadInstance>
+                <id:memberClass>${h.service.memberClass}</id:memberClass>
+                <id:memberCode>${h.service.memberCode}</id:memberCode>
+                <id:subsystemCode>${h.service.subsystemCode}</id:subsystemCode>
+                <id:serviceCode>${h.service.serviceCode}</id:serviceCode>
+                <id:serviceVersion>${h.service.serviceVersion}</id:serviceVersion>
+            </xrd:service>
+            <xrd:id>${h.id}</xrd:id>
+            <xrd:userId>${h.userId}</xrd:userId>
+            <xrd:issue>${h.issue}</xrd:issue>
+            <xrd:protocolVersion>${h.protocolVersion}</xrd:protocolVersion>`;
+  });
+} catch (error) {
+  console.log('Soap error: ', error);  
+}
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
