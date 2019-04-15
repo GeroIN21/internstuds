@@ -27,7 +27,7 @@ module.exports = function(sequelize, DataTypes) {
 			defaultValue: '0'
 		},
 		Program: {
-			type: DataTypes.STRING(60),
+			type: DataTypes.STRING(255),
 			allowNull: false,
 			defaultValue: '0'
 		},
@@ -37,7 +37,7 @@ module.exports = function(sequelize, DataTypes) {
 			defaultValue: '0'
 		},
 		Note: {
-			type: DataTypes.STRING(255),
+			type: DataTypes.TEXT,
 			allowNull: true,
 			defaultValue: '0'
 		}

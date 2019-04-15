@@ -1,9 +1,9 @@
 {
-  "name": "diploservice",
-  "version": "0.1.4",
+  "name": "internstuds",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "node ./bin/www"
   },
   "dependencies": {
     "body-parser": "^1.18.3",

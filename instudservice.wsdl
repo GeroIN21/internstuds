@@ -52,6 +52,14 @@
             <xs:element name="internStudentsServiceResponse">
                 <xs:complexType>
                     <xs:sequence>
+
+                        <xs:element name="Response" type="xs:string">
+                            <xs:annotation>
+                                <xs:appinfo>
+                                    <xrd:title>Response</xrd:title>
+                                </xs:appinfo>
+                            </xs:annotation>
+                        </xs:element>
                         
                         <xs:element name="StudName" type="xs:string">
                             <xs:annotation>
